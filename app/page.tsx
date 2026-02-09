@@ -63,17 +63,26 @@ export default function HomePage() {
   const transactions = user ? cloudTransactions : localTransactions;
 
   const addTx = async (
-    t: Omit<Transaction, 'id' | 'userId' | 'month' | 'createdAt'> & { id?: string }
-  ) => {
-    const month = getMonthKey(t.date);
-    if (user) {
-      const id = await createTransaction({ ...(t as any), userId: user.uid, month });
-      setCloudTransactions(prev => [{ ...(t as any), id, userId: user.uid, month, createdAt: Date.now() }, ...prev]);
-    } else {
-      const draft: Transaction = { ...(t as any), id: crypto.randomUUID(), userId: 'local', month, createdAt: Date.now() };
-      setLocalTransactions(prev => [draft, ...prev]);
-    }
-  };
+  t: Omit<Transaction, 'id' | 'userId' | 'month' | 'createdAt'> & { id?: string }
+) => {
+  const month = getMonthKey(t.date);
+  if (user) {
+    const id = await createTransaction({ ...(t as any), userId: user.uid, month });
+    setCloudTransactions(prev => [
+      { ...(t as any), id, userId: user.uid, month, createdAt: Date.now() },
+      ...prev
+    ]);
+  } else {
+    const draft: Transaction = {
+      ...(t as any),
+      id: crypto.randomUUID(),
+      userId: 'local',
+      month,
+      createdAt: Date.now(),
+    };
+    setLocalTransactions(prev => [draft, ...prev]);
+  }
+};
 
   const deleteTx = async (id: string) => {
     try {
