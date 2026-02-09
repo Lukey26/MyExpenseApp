@@ -18,7 +18,7 @@ export interface FiltersState {
   category: 'all' | string;
 }
 
-export interface Budget {
+export interface BudgetDoc {
   categories: Record<string, number>; // category -> monthly budget amount
   currency?: string;
   updatedAt?: number;
