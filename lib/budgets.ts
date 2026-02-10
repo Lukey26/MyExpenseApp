@@ -5,6 +5,8 @@ import type { BudgetDoc } from './types';
 export async function getBudget(uid: string, month: string): Promise<BudgetDoc | null> {
   const ref = doc(db, 'budgets', uid, 'months', month);
   const snap = await getDoc(ref);
+
+  
   if (!snap.exists()) return null;
   const data = snap.data() as any;
   return {
