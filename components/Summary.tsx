@@ -1,17 +1,47 @@
 'use client';
 import { formatCurrency } from '@/lib/format';
-import type { Transaction } from '@/lib/types';
+import type { Transaction, IncomeFrequency } from '@/lib/types';
 
-export default function Summary({ transactions }: { transactions: Transaction[] }) {
+export default function Summary({ 
+  transactions, 
+  incomeFrequency 
+}: { 
+  transactions: Transaction[];
+  incomeFrequency?: IncomeFrequency;
+}) {
   const income = transactions.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
   const expense = transactions.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
   const net = income - expense;
 
+  // Calculate period-based averages
+  let avgIncome = income;
+  let avgExpense = expense;
+  let periodLabel = '';
+
+  if (incomeFrequency === 'weekly') {
+    // Assuming 4 weeks per month
+    avgIncome = income / 4;
+    avgExpense = expense / 4;
+    periodLabel = ' (Weekly Avg)';
+  }
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-      <Card title="Income" value={formatCurrency(income)} accent="green" />
-      <Card title="Expenses" value={formatCurrency(expense)} accent="red" />
-      <Card title="Net" value={formatCurrency(net)} accent={net >= 0 ? 'blue' : 'orange'} />
+      <Card 
+        title={`Income${periodLabel}`} 
+        value={formatCurrency(incomeFrequency === 'weekly' ? avgIncome : income)} 
+        accent="green" 
+      />
+      <Card 
+        title={`Expenses${periodLabel}`} 
+        value={formatCurrency(incomeFrequency === 'weekly' ? avgExpense : expense)} 
+        accent="red" 
+      />
+      <Card 
+        title={`Net${periodLabel}`} 
+        value={formatCurrency(incomeFrequency === 'weekly' ? (avgIncome - avgExpense) : net)} 
+        accent={net >= 0 ? 'blue' : 'orange'} 
+      />
     </div>
   );
 }

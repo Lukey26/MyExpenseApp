@@ -8,11 +8,13 @@ import TransactionList from '@/components/TransactionList';
 import AuthBar from '@/components/AuthBar';
 import Modal from '@/components/Modal';
 import EditTransactionForm from '@/components/EditTransactionForm';
+import MonthlyInsights from '@/components/MonthlyInsights';
+import PreferencesPanel from '@/components/PreferencesPanel';
 
 import BudgetPanel from '@/components/BudgetPanel';
 
 import { useLocalStorage } from '@/lib/storage';
-import type { Transaction, FiltersState } from '@/lib/types';
+import type { Transaction, FiltersState, UserPreferences } from '@/lib/types';
 import { getMonthKey } from '@/lib/format';
 import { auth } from '@/lib/firebase';
 import { onAuthStateChanged, type User } from 'firebase/auth';
@@ -25,6 +27,10 @@ const CATEGORIES = [
 
 export default function HomePage() {
   const [localTransactions, setLocalTransactions] = useLocalStorage<Transaction[]>('transactions', []);
+  const [preferences, setPreferences] = useLocalStorage<UserPreferences>('userPreferences', {
+    incomeFrequency: 'monthly',
+    currency: 'USD'
+  });
   const [user, setUser] = useState<User | null>(null);
   const [cloudTransactions, setCloudTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(false);
@@ -161,6 +167,7 @@ export default function HomePage() {
       </header>
 
       <TransactionForm onAdd={addTx as any} />
+      <PreferencesPanel preferences={preferences} onUpdate={setPreferences} />
       <Filters value={filters} categories={CATEGORIES} onChange={setFilters} />
 
       {!mounted ? (
@@ -173,7 +180,14 @@ export default function HomePage() {
         <div className="text-sm text-gray-600">Loading transactions…</div>
       ) : (
         <>
-          <Summary transactions={filtered} />
+          <Summary transactions={filtered} incomeFrequency={preferences.incomeFrequency} />
+
+          {/* Monthly Insights Visualization */}
+          <MonthlyInsights 
+            transactions={transactions} 
+            month={monthKey} 
+            incomeFrequency={preferences.incomeFrequency}
+          />
 
           {/* Budgets (use the entire month's transactions, not the filtered subset) */}
             {user && (

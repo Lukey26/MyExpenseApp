@@ -23,3 +23,10 @@ export interface BudgetDoc {
   currency?: string;
   updatedAt?: number;
 }
+
+export type IncomeFrequency = 'weekly' | 'monthly';
+
+export interface UserPreferences {
+  incomeFrequency: IncomeFrequency;
+  currency?: string;
+}

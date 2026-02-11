@@ -6,7 +6,7 @@ import type { Transaction, TxType } from '@/lib/types';
 import { getMonthKey } from '@/lib/format';
 
 const CATEGORIES = [
-  'Salary', 'Freelance', 'Food', 'Transport', 'Bills',
+  'Salary', 'Food', 'Transport', 'Bills',
   'Entertainment', 'Health', 'Shopping', 'Other'
 ];
 
