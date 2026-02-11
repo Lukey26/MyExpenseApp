@@ -9,7 +9,6 @@ import AuthBar from '@/components/AuthBar';
 import Modal from '@/components/Modal';
 import EditTransactionForm from '@/components/EditTransactionForm';
 import MonthlyInsights from '@/components/MonthlyInsights';
-import PreferencesPanel from '@/components/PreferencesPanel';
 
 import BudgetPanel from '@/components/BudgetPanel';
 
@@ -166,8 +165,11 @@ export default function HomePage() {
         <AuthBar />
       </header>
 
-      <TransactionForm onAdd={addTx as any} />
-      <PreferencesPanel preferences={preferences} onUpdate={setPreferences} />
+      <TransactionForm 
+        onAdd={addTx as any} 
+        preferences={preferences}
+        onPreferencesUpdate={setPreferences}
+      />
       <Filters value={filters} categories={CATEGORIES} onChange={setFilters} />
 
       {!mounted ? (

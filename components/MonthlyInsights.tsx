@@ -46,17 +46,18 @@ export default function MonthlyInsights({ transactions, month, incomeFrequency }
     const timeData: Record<string, { income: number; expense: number }> = {};
     
     transactions.forEach(t => {
-      const date = new Date(t.date);
+      const date = new Date(t.date + 'T00:00:00'); // Add time to avoid timezone issues
       let timeKey: string;
       
       if (incomeFrequency === 'weekly') {
-        // Group by week (Sunday start)
+        // Group by week - use ISO week format to ensure consistency
         const weekStart = new Date(date);
-        weekStart.setDate(date.getDate() - date.getDay());
-        timeKey = weekStart.toISOString().slice(0, 10);
+        weekStart.setDate(date.getDate() - date.getDay()); // Start of week (Sunday)
+        // Include year and month in key to avoid collision across months
+        timeKey = `${weekStart.getFullYear()}-${String(weekStart.getMonth() + 1).padStart(2, '0')}-${String(weekStart.getDate()).padStart(2, '0')}`;
       } else {
-        // Group by month
-        timeKey = t.date.slice(0, 7); // YYYY-MM
+        // Group by month - use the existing month field
+        timeKey = t.month || t.date.slice(0, 7); // YYYY-MM
       }
       
       if (!timeData[timeKey]) {
@@ -157,12 +158,19 @@ export default function MonthlyInsights({ transactions, month, incomeFrequency }
             
             <div className="space-y-2 max-h-48 overflow-y-auto">
               {data.timeData.map((period, idx) => {
-                const periodLabel = incomeFrequency === 'weekly'
-                  ? `Week ${idx + 1}`
-                  : new Date(period.date + '-01').toLocaleDateString('en-US', { 
-                      month: 'short', 
-                      year: 'numeric' 
-                    });
+                let periodLabel: string;
+                
+                if (incomeFrequency === 'weekly') {
+                  periodLabel = `Week ${idx + 1}`;
+                } else {
+                  // For monthly, parse the YYYY-MM format correctly
+                  const [year, month] = period.date.split('-');
+                  const date = new Date(parseInt(year), parseInt(month) - 1, 1);
+                  periodLabel = date.toLocaleDateString('en-US', { 
+                    month: 'short', 
+                    year: 'numeric' 
+                  });
+                }
                 
                 return (
                   <div key={period.date} className="grid grid-cols-4 gap-2 text-sm py-1">
@@ -249,7 +257,15 @@ function BarChart({ timeData, incomeFrequency }: {
         const incomeHeight = maxValue > 0 ? (period.income / maxValue) * 100 : 0;
         const expenseHeight = maxValue > 0 ? (period.expense / maxValue) * 100 : 0;
         
-        const label = incomeFrequency === 'weekly' ? `W${idx + 1}` : new Date(period.date + '-01').toLocaleDateString('en-US', { month: 'short' });
+        let label: string;
+        if (incomeFrequency === 'weekly') {
+          label = `W${idx + 1}`;
+        } else {
+          // For monthly, parse YYYY-MM correctly
+          const [year, month] = period.date.split('-');
+          const date = new Date(parseInt(year), parseInt(month) - 1, 1);
+          label = date.toLocaleDateString('en-US', { month: 'short' });
+        }
         
         return (
           <div key={period.date} className="flex-1 flex flex-col items-center gap-2">
