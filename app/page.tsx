@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import TransactionForm from '@/components/TransactionForm';
 import Filters from '@/components/Filters';
 import Summary from '@/components/Summary';
@@ -8,7 +9,6 @@ import TransactionList from '@/components/TransactionList';
 import AuthBar from '@/components/AuthBar';
 import Modal from '@/components/Modal';
 import EditTransactionForm from '@/components/EditTransactionForm';
-import MonthlyInsights from '@/components/MonthlyInsights';
 
 import BudgetPanel from '@/components/BudgetPanel';
 
@@ -25,6 +25,7 @@ const CATEGORIES = [
 ];
 
 export default function HomePage() {
+  const router = useRouter();
   const [localTransactions, setLocalTransactions] = useLocalStorage<Transaction[]>('transactions', []);
   const [preferences, setPreferences] = useLocalStorage<UserPreferences>('userPreferences', {
     incomeFrequency: 'monthly',
@@ -184,12 +185,16 @@ export default function HomePage() {
         <>
           <Summary transactions={filtered} incomeFrequency={preferences.incomeFrequency} />
 
-          {/* Monthly Insights Visualization */}
-          <MonthlyInsights 
-            transactions={transactions} 
-            month={monthKey} 
-            incomeFrequency={preferences.incomeFrequency}
-          />
+          {/* Insights Button */}
+          <button
+            onClick={() => router.push('/insights')}
+            className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg p-4 hover:from-blue-600 hover:to-purple-700 transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+            <span className="font-semibold">View Insights & Analytics</span>
+          </button>
 
           {/* Budgets (use the entire month's transactions, not the filtered subset) */}
             {user && (
